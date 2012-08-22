@@ -67,10 +67,11 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 					if(isset($relations[$name])){
 						$relation = $relations[$name]->data();
 
-						$relationModel = Libraries::locate('models', $relation['class']);
+						$relationModel = Libraries::locate('models', $relation['to']);
 
-						if(!empty($relationModel)){
+						if(!empty($relationModel) && !empty($results)){
 							$key = $relationModel::meta('embedded');
+
 
 							foreach($results as $k => $result){								
 	
@@ -89,7 +90,7 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 									}
 
 									$results[$k]->$key = $relationModel::find($type, $options);
-									
+
 								} else {
 									if($relation['type'] == 'hasMany'){
 										$type = 'set';
