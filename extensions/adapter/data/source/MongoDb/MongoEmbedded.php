@@ -38,6 +38,14 @@ use Exception;
  */
 class MongoEmbedded extends \lithium\data\source\MongoDb {
 
+	public function __construct(array $config = array()) {
+		parent::__construct($config);
+	}
+
+	protected function _init() {
+		parent::_init();
+	}
+
 	public function read($query, array $options = array()) {
 
 		if(!empty($options['data'])){
@@ -46,7 +54,6 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 			return $this->_filter(__METHOD__, $params, function($self, $params) use ($_config) {
 				$query = $params['query'];			
 				$config = compact('query') + array('class' => 'set');
-
 				return $self->item($params['query']->model(), $params['options']['data'], $config);
 			});
 		}
@@ -69,36 +76,84 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 						$relationModel = Libraries::locate('models', $relation['to']);
 
-						if(!empty($relationModel) && !empty($results)){
-							$key = $relationModel::meta('embedded');
-
+						if(!empty($relationModel) && !empty($results) && isset($relation['embedded'])){
+							$embedded_on = $relation['embedded'];
 
 							foreach($results as $k => $result){								
-	
-								if(!empty($key) && !empty($result->$key)){
-									// TODO : Add support for conditions, fields, order, page, limit
-									$validFields = array_fill_keys(array('with'), null);
+		
+								$relationalData = Set::extract($result->to('array'), '/'.str_replace('.', '/', $embedded_on));
 
-									$options = array_intersect_key($relation, $validFields);
+								if(!empty($embedded_on)){
 
-									$options['data'] = $result->$key->to('array');
+									$keys = explode('.', $embedded_on);
 
-									if($relation['type'] == 'hasMany'){
-										$type = 'all';
-									} else {
-										$type = 'first';
+									$lastKey = $keys;
+									$lastKey = array_pop($lastKey);
+
+									foreach($relationalData as $rk => $rv){
+										if(isset($rv[$lastKey]) && is_array($rv[$lastKey])){
+											$relationalData[$rk] = $rv[$lastKey];
+										}
 									}
 
-									$results[$k]->$key = $relationModel::find($type, $options);
+									if(!empty($relationalData)){
+										// TODO : Add support for conditions, fields, order, page, limit
+										$validFields = array_fill_keys(array('with'), null);
 
-								} else {
-									if($relation['type'] == 'hasMany'){
-										$type = 'set';
+										$options = array_intersect_key($relation, $validFields);
+
+										$options['data'] = $relationalData;
+
+										if($relation['type'] == 'hasMany'){
+											$type = 'all';
+										} else {
+											$type = 'first';
+										}
+
+										$relationResult = $relationModel::find($type, $options);
+
 									} else {
-										$type = 'entity';
+										if($relation['type'] == 'hasMany'){
+											$type = 'set';
+										} else {
+											$type = 'entity';
+										}
+
+										$relationResult = $self->item($query->model(), array(), array('type' => $type));
 									}
 
-									$results[$k]->$key = $self->item($query->model(), array(), array('type' => $type));
+									// if fieldName === true, use the default lithium fieldName. 
+									// if fieldName != relationName, then it was manually set, so use it
+									// else, just use the embedded key
+									if($relation['fieldName'] === true){
+										$relation['fieldName'] = lcfirst($relation['name']);
+										$keys = explode('.', $relation['fieldName']);
+									} else if ($relation['fieldName'] != lcfirst($relation['name'])){
+										$keys = explode('.', $relation['fieldName']);
+									}
+
+									// there has got to be a better way to do this
+									switch (count($keys)) {
+										case 1:
+											$results[$k]->$keys[0] = $relationResult;
+											break;
+										case 2:
+											$results[$k]->$keys[0]->$keys[1] = $relationResult;
+											break;	
+										case 3:
+											$results[$k]->$keys[0]->$keys[1]->$keys[2] = $relationResult;
+											break;
+										case 4:
+											$results[$k]->$keys[0]->$keys[1]->$keys[2]->$keys[3] = $relationResult;
+											break;
+										case 5:
+											$results[$k]->$keys[0]->$keys[1]->$keys[2]->$keys[3]->$keys[4] = $relationResult;
+											break;
+										case 6:
+											$results[$k]->$keys[0]->$keys[1]->$keys[2]->$keys[3]->$keys[4]->$keys[5] = $relationResult;	
+											break;
+
+									}
 
 								}
 

@@ -45,35 +45,37 @@ Connections::add('default', array(
 ));
 ~~~
 
-#### Defining Embedded Model
+#### Using an Embedded Relation
 
-To classify a model as embedded, specify these two $_meta value on the embedded model.
-
-~~~ php
-class Players extends  \lithium\data\Model.php {
-
-	protected $_meta = array(
-		'source' => 'Team',
-		'embedded'	=> 'players',
+	public $hasOne = array(
+		'FieldSpecialty' => array(
+			'to'    	=> 'FieldSpecialties',
+			'key'       => array('field_specialty._id' => '_id'),
+			'embedded'  => 'field_specialty',			
+		),
+		'Specialist' => array(
+			'to'  => 'Specialists',
+			'key' => array('specialist'),
+			'embedded'  => 'field_specialty',			
+			'fieldName' => 'specialist',
+		),
 	);
 
-}
-~~~
 
-source	 - the parent model in which this model is embedded
-embedded - the key from which the data should be pulled - Currently only supports 1 level deep so no dot syntax strings here, yet. 
-
-
-#### Using Relations
-
-Continue defining relations in the lithium specified way as described [here](http://lithify.me/docs/manual/working-with-data/relationships.wiki)
+Continue defining relations in the lithium specified way as described [here](http://lithify.me/docs/manual/working-with-data/relationships.wiki), except for the embedded key
 
 ~~~ php
 class Team extends  \lithium\data\Model.php {
 
 	public $hasMany = array(
 		'Players' => array(
-			'to' => 'Players',
+			'to' 	   => 'Players',
+			'embedded' => 'players'
+ 		),
+ 		'Scouts' => array(
+ 			'to' => 'Scouts',
+ 			'embedded' => 'miscellaneous.offseason.scouts',
+ 			'fieldName' => 'scouts',
  		),
 	);
 
@@ -82,7 +84,10 @@ class Team extends  \lithium\data\Model.php {
 Key specified is the name used to refernce the relation on a find query.
 
 Options are:
-to - specifieds target model
+to 		  - specifieds target model
+embedded  - the key on which the data is embedded. Currently there is support for 6 layers deep via dot syntax
+fieldName - the key on which the related model will be attached (in the above example the nested scouts DocumentSet would be embedded onto $team->scouts)
+
 
 #### Calling Relations
 
