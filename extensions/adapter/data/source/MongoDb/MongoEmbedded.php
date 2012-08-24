@@ -40,14 +40,10 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 	public function __construct(array $config = array()) {
 		parent::__construct($config);
-	}
-
-	protected function _init() {
-		parent::_init();
+		$this->_readEmbeddedFilter();		
 	}
 
 	public function read($query, array $options = array()) {
-
 		if(!empty($options['data'])){
 			$params = compact('query', 'options');
 			$_config = $this->_config;
@@ -58,10 +54,73 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 			});
 		}
 
+		if(isset($options['embeddedOn']) && isset($options['embeddedOn']['source']) && isset($options['embeddedOn']['key'])){
+			$embeddedOn = Libraries::locate('models', $options['embeddedOn']['source']);
+			$relation = $embeddedOn::relations($options['embeddedOn']['key']);
+			if(!empty($relation)){
+				$relation = $relation->data();
+
+				if(isset($relation['embedded'])){
+					$embeddedKey = $relation['embedded'];
+					$newOptions = $options;
+
+					foreach(array('conditions', 'fields', 'order') as $key){
+						if(!empty($options[$key])){
+							unset($newOptions[$key]);
+							foreach($options[$key] as $k => $v){
+								if(is_int($k)){
+									$newVal = $embeddedKey.'.'.$v;
+									$newOptions[$key][] = $newVal;		
+								} else {
+									$newKey = $embeddedKey.'.'.$k;
+									$newOptions[$key][$newKey] = $v;			
+								}
+							}
+						}
+						if($key == 'fields' && (!isset($newOptions['fields']) || empty($newOptions['fields']))){
+							$newOptions['fields'][] = $embeddedKey;
+						}			
+					}
+
+					$newOptions['source'] = $embeddedOn::meta('source');
+
+					$options['embeddedKey'] = $embeddedKey;
+
+					$query = $options['model']::invokeMethod('_instance', array('query', $newOptions));
+				}
+			}		
+		}
+
+		return parent::read($query, $options);
+	}
+
+	protected function _readEmbeddedFilter(){
 		// filter for relations
-		self::applyFilter(__FUNCTION__, function($self, $params, $chain) {
+		self::applyFilter('read', function($self, $params, $chain) {
 		
 			$results = $chain->next($self, $params, $chain);
+
+			if(isset($params['options']['embeddedKey']) && !empty($params['options']['embeddedKey'])){
+				$newResults = array();
+
+				foreach($results as $k => $result){
+					$result = Set::extract($result->to('array'), '/'.str_replace('.', '/', $params['options']['embeddedKey']));
+					$newResult = array();
+
+					if(!empty($result)){
+						$lastKey = array_pop(explode('.', $params['options']['embeddedKey']));
+						foreach($result as $rk => $rv){
+							if(isset($rv[$lastKey]) && is_array($rv[$lastKey])){
+								$newResult[$rk] = $self->item($params['query']->model(), $rv[$lastKey], array('class' => 'entity'));
+							}
+						}
+					}
+	
+					$newResults[$k] = $self->item($params['query']->model(), $newResult, array('class' => 'set'));
+				}
+
+				$results = $self->item($params['query']->model(), $newResults, array('class' => 'set'));
+			}
 
 			if(isset($params['options']['with']) && !empty($params['options']['with'])){
 	
@@ -169,9 +228,7 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 			return $results;
 
-		});		
-
-		return parent::read($query, $options);
+		});
 	}
 
 }
