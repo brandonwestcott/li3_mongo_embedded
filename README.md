@@ -85,7 +85,7 @@ Key specified is the name used to refernce the relation on a find query.
 
 Options are:
 to 		  - specifieds target model
-embedded  - the key on which the data is embedded. Currently there is support for 6 layers deep via dot syntax
+embedded  - the key on which the data is embedded
 fieldName - the key on which the related model will be attached (in the above example the nested scouts DocumentSet would be embedded onto $team->scouts)
 
 
