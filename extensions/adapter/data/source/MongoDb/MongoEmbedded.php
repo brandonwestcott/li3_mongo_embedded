@@ -40,14 +40,10 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 	public function __construct(array $config = array()) {
 		parent::__construct($config);
-	}
-
-	protected function _init() {
-		parent::_init();
+		$this->_readEmbeddedFilter();		
 	}
 
 	public function read($query, array $options = array()) {
-
 		if(!empty($options['data'])){
 			$params = compact('query', 'options');
 			$_config = $this->_config;
@@ -58,8 +54,12 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 			});
 		}
 
+		return parent::read($query, $options);
+	}
+
+	protected function _readEmbeddedFilter(){
 		// filter for relations
-		self::applyFilter(__FUNCTION__, function($self, $params, $chain) {
+		self::applyFilter('read', function($self, $params, $chain) {
 		
 			$results = $chain->next($self, $params, $chain);
 
@@ -119,40 +119,30 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 											$type = 'entity';
 										}
 
-										$relationResult = $self->item($query->model(), array(), array('type' => $type));
+										$relationResult = $self->item($query->model(), array(), array('class' => $type));
 									}
 
 									// if fieldName === true, use the default lithium fieldName. 
 									// if fieldName != relationName, then it was manually set, so use it
 									// else, just use the embedded key
+									$relationName = ($relation['type'] == 'hasOne') ? Inflector::pluralize($relation['name']) : $relation['name'];
 									if($relation['fieldName'] === true){
-										$relation['fieldName'] = lcfirst($relation['name']);
+										$relation['fieldName'] = lcfirst($relationName);
 										$keys = explode('.', $relation['fieldName']);
-									} else if ($relation['fieldName'] != lcfirst($relation['name'])){
+									} else if ($relation['fieldName'] != lcfirst($relationName)){
 										$keys = explode('.', $relation['fieldName']);
 									}
-
-									// there has got to be a better way to do this
-									switch (count($keys)) {
-										case 1:
-											$results[$k]->$keys[0] = $relationResult;
-											break;
-										case 2:
-											$results[$k]->$keys[0]->$keys[1] = $relationResult;
-											break;	
-										case 3:
-											$results[$k]->$keys[0]->$keys[1]->$keys[2] = $relationResult;
-											break;
-										case 4:
-											$results[$k]->$keys[0]->$keys[1]->$keys[2]->$keys[3] = $relationResult;
-											break;
-										case 5:
-											$results[$k]->$keys[0]->$keys[1]->$keys[2]->$keys[3]->$keys[4] = $relationResult;
-											break;
-										case 6:
-											$results[$k]->$keys[0]->$keys[1]->$keys[2]->$keys[3]->$keys[4]->$keys[5] = $relationResult;	
-											break;
-
+									
+									$ref = $results[$k];
+									foreach($keys as $k => $key){
+										if(!isset($ref->$key)){
+											$ref->$key = $self->item(null, array(), array('class' => 'entity'));
+										}
+										if(count($keys) - 1 == $k){
+											$ref->$key = $relationResult;
+										} else {
+											$ref = $ref->$key;		
+										}
 									}
 
 								}
@@ -169,9 +159,7 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 			return $results;
 
-		});		
-
-		return parent::read($query, $options);
+		});
 	}
 
 }
