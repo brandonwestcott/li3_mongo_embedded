@@ -69,8 +69,11 @@ class Team extends  \lithium\data\Model.php {
 Key specified is the name used to refernce the relation on a find query.
 
 Options are:
-to 		  - specifieds target model
+
+to - specifieds target model
+
 embedded  - the key on which the data is embedded
+
 fieldName - the key on which the related model will be attached (in the above example the nested scouts DocumentSet would be embedded onto $team->scouts)
 
 
