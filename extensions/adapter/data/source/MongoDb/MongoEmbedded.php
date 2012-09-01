@@ -119,7 +119,7 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 											$type = 'entity';
 										}
 
-										$relationResult = $self->item($query->model(), array(), array('class' => $type));
+										$relationResult = $self->item($model, array(), array('class' => $type));
 									}
 
 									// if fieldName === true, use the default lithium fieldName. 
