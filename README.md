@@ -47,21 +47,6 @@ Connections::add('default', array(
 
 #### Using an Embedded Relation
 
-	public $hasOne = array(
-		'FieldSpecialty' => array(
-			'to'    	=> 'FieldSpecialties',
-			'key'       => array('field_specialty._id' => '_id'),
-			'embedded'  => 'field_specialty',			
-		),
-		'Specialist' => array(
-			'to'  => 'Specialists',
-			'key' => array('specialist'),
-			'embedded'  => 'field_specialty',			
-			'fieldName' => 'specialist',
-		),
-	);
-
-
 Continue defining relations in the lithium specified way as described [here](http://lithify.me/docs/manual/working-with-data/relationships.wiki), except for the embedded key
 
 ~~~ php
