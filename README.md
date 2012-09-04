@@ -1,6 +1,6 @@
 # [Lithium PHP](http://lithify.me) Plugin to allow embedded relations for MongoDB
 
-This is in its early stages and only supports READ opperations. Hope to add support for full CRUD in the future.
+This is in its early stages and only supports READ opperations. Hopefully, this plugin will not be needed for very long as li3 plans to support embedded relations in the core.
 
 A plugin to add support to li3 embedded relations for MongoDb. Lithiums mongo adapter says it supports embedded relations, but after much investigation throught the core it appears this is not the case. Basically, when an embedded relation is specified, it does the single query for the parent and when the data is returned it creates the appropiate model with the data returned from the parent.
 
@@ -100,7 +100,4 @@ However, when no data is returned, the behavior is slightly different. An empty 
 1. Beta Beta Beta - Currently, this plugin is being used heavily in a read MongoDB environment. However, writes will likely majorly screw up your db. Use with caution.
 
 ## Plans for the future
-Need to get full CRUD on the embedded documents. Also, I desire to add support for nested relations, such as staff.players
-
-## Collaborate
-Please fork and contribute!
+Hopefully this plugin has a short future. This was a quick solution that allowed us not to hack core li3. I hope to move this work into a fork of the core and contribute there.
