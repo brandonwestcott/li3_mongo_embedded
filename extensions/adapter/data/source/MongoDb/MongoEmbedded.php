@@ -114,12 +114,10 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 									} else {
 										if($relation['type'] == 'hasMany'){
-											$type = 'set';
+											$relationResult = $self->item($relationModel, array(), array('class' => 'set'));
 										} else {
-											$type = 'entity';
+											$relationResult = null;
 										}
-
-										$relationResult = $self->item($model, array(), array('class' => $type));
 									}
 
 									// if fieldName === true, use the default lithium fieldName. 
