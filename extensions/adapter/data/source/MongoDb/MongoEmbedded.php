@@ -79,30 +79,38 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 						if(!empty($relationModel) && !empty($results) && isset($relation['embedded'])){
 							$embedded_on = $relation['embedded'];
 
-							foreach($results as $k => $result){								
+							$resultsArray = $results->to('array');
+
+							foreach($resultsArray as $k => $result){								
 		
-								$relationalData = Set::extract($result->to('array'), '/'.str_replace('.', '/', $embedded_on));
+								$relationalData = Set::extract($result, '/'.str_replace('.', '/', $embedded_on));
 
 								if(!empty($embedded_on)){
 
 									$keys = explode('.', $embedded_on);
 
-									$lastKey = $keys;
-									$lastKey = array_pop($lastKey);
+									$lastKey = array_slice($keys, -1, 1);
+									$lastKey = $lastKey[0];
+
+									$data = array();
 
 									foreach($relationalData as $rk => $rv){
-										if(isset($rv[$lastKey]) && is_array($rv[$lastKey])){
-											$relationalData[$rk] = $rv[$lastKey];
+										if(!empty($rv)){
+											if(!is_array($rv)){
+												$data[$rk] = $rv;
+											} else if (isset($rv[$lastKey]) && !empty($rv[$lastKey])){
+												$data[$rk] = $rv[$lastKey];											
+											}
 										}
 									}
-
-									if(!empty($relationalData)){
+									
+									if(!empty($data)){
 										// TODO : Add support for conditions, fields, order, page, limit
 										$validFields = array_fill_keys(array('with'), null);
 
 										$options = array_intersect_key($relation, $validFields);
 
-										$options['data'] = $relationalData;
+										$options['data'] = $data;
 
 										if($relation['type'] == 'hasMany'){
 											$type = 'all';
@@ -114,12 +122,10 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 									} else {
 										if($relation['type'] == 'hasMany'){
-											$type = 'set';
+											$relationResult = $self->item($relationModel, array(), array('class' => 'set'));
 										} else {
-											$type = 'entity';
+											$relationResult = null;
 										}
-
-										$relationResult = $self->item($query->model(), array(), array('class' => $type));
 									}
 
 									// if fieldName === true, use the default lithium fieldName. 
