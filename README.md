@@ -1,8 +1,8 @@
 # [Lithium PHP](http://lithify.me) Plugin to allow embedded relations for MongoDB
 
-This is in its early stages and only supports READ opperations. Hopefully, this plugin will not be needed for very long as li3 plans to support embedded relations in the core.
+This is in its early stages and only supports READ operations. Hopefully, this plugin will not be needed for very long as li3 plans to support embedded relations in the core.
 
-A plugin to add support to li3 embedded relations for MongoDb. Lithiums mongo adapter says it supports embedded relations, but after much investigation throught the core it appears this is not the case. Basically, when an embedded relation is specified, it does the single query for the parent and when the data is returned it creates the appropiate model with the data returned from the parent.
+A plugin to add support to li3 embedded relations for MongoDb. Lithiums mongo adapter says it supports embedded relations, but after much investigation through the core it appears this is not the case. Basically, when an embedded relation is specified, it does the single query for the parent and when the data is returned it creates the appropriate model with the data returned from the parent.
 
 ## Installation
 
@@ -13,13 +13,13 @@ Modify your projects `composer.json` file
 {
     "require": {
     	...
-        "brandonwestcott/li3_embedded": "master"
+        "brandonwestcott/li3_mongo_embedded": "master"
         ...
     }
 }
 ~~~
 
-Run `./composer.phar install` which will install this librarie into your app/libraries
+Run `./composer.phar install` which will install this library into your app/libraries
 
 ### Alternately, just clone, download or submodule
 1. Clone/Download/submodule the plugin into your app's ``libraries`` directory.
@@ -31,7 +31,7 @@ Add the plugin in your `config/bootstrap/libraries.php` file:
 
 ~~~ php
 <?php
-	Libraries::add('li3_embedded');
+	Libraries::add('li3_mongo_embedded');
 ?>
 ~~~
 
@@ -66,10 +66,10 @@ class Team extends  \lithium\data\Model.php {
 
 ~~~
 
-Key specified is the name used to refernce the relation on a find query.
+Key specified is the name used to reference the relation on a find query.
 
 Options are:  
-to - specifieds target model  
+to - specified target model  
 embedded  - the key on which the data is embedded  
 fieldName - the key on which the related model will be attached (in the above example the nested scouts DocumentSet would be embedded onto $team->scouts)  
 
@@ -98,6 +98,7 @@ However, when no data is returned, the behavior is slightly different. An empty 
 
 ## Some Notes
 1. Beta Beta Beta - Currently, this plugin is being used heavily in a read MongoDB environment. However, writes will likely majorly screw up your db. Use with caution.
+2. Need to move the relations on to the $_relationships array on Entity
 
 ## Plans for the future
 Hopefully this plugin has a short future. This was a quick solution that allowed us not to hack core li3. I hope to move this work into a fork of the core and contribute there.
