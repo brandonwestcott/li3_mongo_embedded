@@ -43,6 +43,17 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 		$this->_readEmbeddedFilter();		
 	}
 
+
+	/**
+	 * Extended for full namesapce support
+	 */
+	public function relationship($class, $type, $name, array $config = array()) {
+		if(isset($config['to'])){
+			$config['to'] = Libraries::locate('models', $config['to']);
+		}
+		return parent::relationship($class, $type, $name, $config);
+	}
+
 	public function read($query, array $options = array()) {
 		if(!empty($options['data'])){
 			$params = compact('query', 'options');
