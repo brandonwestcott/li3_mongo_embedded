@@ -6,7 +6,7 @@
  * @license       http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace li3_embedded\extensions\adapter\data\source\MongoDb;
+namespace li3_mongo_embedded\extensions\adapter\data\source\MongoDb;
 
 use Mongo;
 use MongoId;
