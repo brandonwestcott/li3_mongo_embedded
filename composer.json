@@ -1,9 +1,9 @@
 {
-	"name": "brandonwestcott/li3_embedded",
+	"name": "brandonwestcott/li3_mongo_embedded",
 	"type": "li3-libraries",
 	"description": "Lithium PHP mongo embedded relations",
 	"keywords": ["relations", "mongodb", "li3", "lithium", "models"],
-	"homepage": "https://github.com/brandonwestcott/li3_embedded",
+	"homepage": "https://github.com/brandonwestcott/li3_mongo_embedded",
 	"license": "GNU General Public License",
 	"authors": [
 		{
