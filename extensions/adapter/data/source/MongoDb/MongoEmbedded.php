@@ -80,11 +80,21 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 				$relations = $model::relations();
 
-				foreach($params['options']['with'] as $k => $name){
+				foreach($params['options']['with'] as $key => $val){
+					$relation = null;
 
-					if(isset($relations[$name])){
-						$relation = $relations[$name]->data();
+					if(!is_int($key) && isset($relations[$key])){
+						$relation = $relations[$key]->data();
 
+						if(!empty($val)){
+							$relation = array_merge($relation, $val);
+						}
+					} else if (isset($relations[$val])) {
+						$relation = $relations[$val]->data();
+					}
+
+					if(!empty($relation)){
+					
 						$relationModel = Libraries::locate('models', $relation['to']);
 
 						if(!empty($relationModel) && !empty($results) && isset($relation['embedded'])){
