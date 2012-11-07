@@ -60,7 +60,7 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 						}
 
 						if(!empty($relation)){
-						
+
 							$relationModel = Libraries::locate('models', $relation['to']);
 
 							if(!empty($relationModel) && isset($relation['embedded'])){
@@ -68,11 +68,13 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 
 								if(!empty($embedded_on)){
 
-									foreach($data as $k => $result){
+									$records = method_exists($data, 'map') ? $data : array($data);
+
+									foreach($records as $k => $record){
 
 										$keys = explode('.', $embedded_on);
 
-										$ref = $data[$k];
+										$ref = $records[$k];
 										foreach($keys as $k => $key){
 											if(isset($ref->$key)){
 												$ref = $ref->$key;		
@@ -100,16 +102,25 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 			return $data;
 		};
 
-
 		// filter for relations
 		self::applyFilter('read', function($self, $params, $chain) use ($processRelations) {
 
 			$results = $chain->next($self, $params, $chain);
 
-			if(!empty($results)){
-				$model = is_object($params['query']) ? $params['query']->model() : null;
-				$results = $processRelations($results, $params['options'], $model);
-			}
+			$queryOptions = $params['options'];
+
+			$model = is_object($params['query']) ? $params['query']->model() : null;
+
+			$results->applyFilter('_populate', function($self, $params, $chain) use ($queryOptions, $processRelations, $model) {
+
+				$item = $chain->next($self, $params, $chain);
+				
+				if(!empty($item)){
+					$item = $processRelations($item, $queryOptions, $model);
+				}
+
+				return $item;
+			});
 
 			return $results;
 
