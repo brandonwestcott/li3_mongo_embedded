@@ -10,8 +10,6 @@ namespace li3_mongo_embedded\extensions\adapter\data\source\MongoDb;
 
 use lithium\core\Libraries;
 
-use lithium\util\collection\Filters;
-
 /**
  * A data source adapter which allows you to connect to the MongoDB database with support for
  * embedded documents.
