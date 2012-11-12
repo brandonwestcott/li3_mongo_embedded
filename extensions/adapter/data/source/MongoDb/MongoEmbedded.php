@@ -99,13 +99,10 @@ class MongoEmbedded extends \lithium\data\source\MongoDb {
 										if(!empty($ref)){
 											// TODO : Add support for conditions, fields, order, page, limit
 											$ref->setModel($relationModel);
-
-											if(isset($relation['with'])){
-												// why find? because we need to be able to filter embedded models, everything is protected in li3, so this was the best way
-												$ref = $relationModel::find('all', array(
-													'embeddedData' => $processRelations($ref, $relation, $relationModel)
-												));
-											}
+											// why find? because we need to be able to filter embedded models, everything is protected in li3, so this was the best way
+											$ref = $relationModel::find('all', array(
+												'embeddedData' => $processRelations($ref, $relation, $relationModel)
+											));
 										}
 									}
 								}
