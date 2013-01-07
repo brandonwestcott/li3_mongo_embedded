@@ -17,10 +17,10 @@ use lithium\core\Libraries;
  * @see lithium\data\source\MongoDb
  */
 class MongoEmbedded extends \lithium\data\source\MongoDb {
-
+	
 	public function __construct(array $config = array()) {
 		$this->_classes['entity']	 = 'li3_mongo_embedded\extensions\data\entity\Document';
-		$this->_classes['array']	 = 'li3_mongo_embedded\extensions\data\collection\DocumentArray';
+		$this->_classes['schema']	 = 'li3_mongo_embedded\extensions\data\source\mongo_db\Schema';
 		$this->_classes['set']		 = 'li3_mongo_embedded\extensions\data\collection\DocumentSet';	
 		parent::__construct($config);
 		$this->_readEmbeddedFilter();		
